@@ -1,11 +1,15 @@
 package com.crud_simples.crud_simples.controller;
 
 
+import com.crud_simples.crud_simples.dto.usuarios.UsuarioAlterarSenhaDTO;
+import com.crud_simples.crud_simples.dto.usuarios.UsuarioAtualizacaoDTO;
 import com.crud_simples.crud_simples.dto.usuarios.UsuarioCriacaoDTO;
 import com.crud_simples.crud_simples.dto.usuarios.UsuarioResponseDTO;
 import com.crud_simples.crud_simples.mapper.MapperUsuario;
 import com.crud_simples.crud_simples.model.Usuario;
 import com.crud_simples.crud_simples.service.UsuarioService;
+import org.apache.catalina.mapper.Mapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,13 +48,21 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public Usuario atualizar(@PathVariable Long id){
-        usuarioService.atualizar(id);
+    public UsuarioResponseDTO atualizar(@PathVariable Long id, @RequestBody UsuarioAtualizacaoDTO dto){
+        Usuario usuario = usuarioService.atualizar(id, dto);
+        return MapperUsuario.toResponse(usuario);
+    }
+
+    @PatchMapping("/alterarSenha/{id}")
+    public ResponseEntity<Void> alterarSenha(@PathVariable Long id, @RequestBody UsuarioAlterarSenhaDTO dto){
+        usuarioService.alterarSenha(id, dto);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id){
-        return usuarioService.deletar(id);
+    public ResponseEntity<Void> deletar(@PathVariable Long id){
+        usuarioService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 
 

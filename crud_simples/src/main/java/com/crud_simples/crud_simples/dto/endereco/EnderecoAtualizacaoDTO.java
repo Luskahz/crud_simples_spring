@@ -9,5 +9,5 @@ public class EnderecoAtualizacaoDTO {
     private String cidade;
     private String bairro;
     private String rua;
-    private int numero;
+    private Integer numero;
 }

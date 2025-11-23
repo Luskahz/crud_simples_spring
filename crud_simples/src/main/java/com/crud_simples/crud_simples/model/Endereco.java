@@ -18,7 +18,7 @@ public class Endereco {
 
     @OneToOne
     @JoinColumn(name = "id_usuario")
-    private Usuario Usuario;
+    private Usuario usuario;
 
 
     private String pais;
@@ -26,5 +26,5 @@ public class Endereco {
     private String cidade;
     private String bairro;
     private String rua;
-    private int numero;
+    private Integer numero;
 }
