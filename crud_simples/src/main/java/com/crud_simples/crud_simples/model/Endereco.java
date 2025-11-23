@@ -6,14 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 @Entity
 @Table (name = "Endereco")
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 
 public class Endereco {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idUsuario;
+    @GeneratedValue
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario Usuario;
+
+
     private String pais;
     private String estado;
     private String cidade;

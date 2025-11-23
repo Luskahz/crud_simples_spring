@@ -1,11 +1,10 @@
 package com.crud_simples.crud_simples.dto.usuarios;
 
-
 import lombok.Data;
 
 @Data
-public class UsuarioCriacaoDTO {
+public class UsuarioResponseDTO {
+    private Long id;
     private String nome;
     private String email;
-    private String senha;
 }

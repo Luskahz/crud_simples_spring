@@ -15,8 +15,13 @@ import javax.naming.Name;
 
 public class Documentos {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idUsuario;
+    @GeneratedValue
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
+
     private String cpf;
     private String rg;
     private String cnh;

@@ -1,0 +1,13 @@
+package com.crud_simples.crud_simples.dto.endereco;
+
+import lombok.Data;
+
+@Data
+public class EnderecoAtualizacaoDTO {
+    private String pais;
+    private String estado;
+    private String cidade;
+    private String bairro;
+    private String rua;
+    private int numero;
+}
