@@ -2,13 +2,16 @@ package com.crud_simples.crud_simples.service;
 
 import com.crud_simples.crud_simples.dto.documentos.DocumentosAtualizacaoDTO;
 import com.crud_simples.crud_simples.dto.documentos.DocumentosCriacaoDTO;
+import com.crud_simples.crud_simples.dto.documentos.DocumentosResponseDTO;
 import com.crud_simples.crud_simples.mapper.MapperDocumentos;
 import com.crud_simples.crud_simples.model.Documentos;
 import com.crud_simples.crud_simples.model.Usuario;
 import com.crud_simples.crud_simples.repository.DocumentosRepository;
 import com.crud_simples.crud_simples.repository.UsuarioRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -16,6 +19,7 @@ public class DocumentosService {
 
     private final DocumentosRepository documentosRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public DocumentosService(DocumentosRepository documentosRepository,
                              UsuarioRepository usuarioRepository) {
@@ -73,5 +77,22 @@ public class DocumentosService {
     public void deletar(Long id) {
         Documentos documentos = buscar(id);
         documentosRepository.delete(documentos);
+    }
+
+    public byte[] gerarJson() {
+        try {
+            List<DocumentosResponseDTO> lista = listar()
+                    .stream()
+                    .map(MapperDocumentos::toResponse)
+                    .toList();
+
+            String json = objectMapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(lista);
+
+            return json.getBytes(StandardCharsets.UTF_8);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar JSON", e);
+        }
     }
 }

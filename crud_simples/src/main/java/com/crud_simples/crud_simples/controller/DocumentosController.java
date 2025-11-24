@@ -67,4 +67,14 @@ public class DocumentosController {
         documentosService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/json")
+    public ResponseEntity<byte[]> exportarJson() {
+        byte[] json = documentosService.gerarJson();
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=documentos.json")
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .body(json);
+    }
 }

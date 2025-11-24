@@ -63,4 +63,13 @@ public class EnderecoController {
         enderecoService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/csv")
+    public ResponseEntity<byte[]> exportarrCsv(){
+        byte[] csv = enderecoService.gerarCsv();
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=enderecos.csv")
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .body(csv);
+    }
 }

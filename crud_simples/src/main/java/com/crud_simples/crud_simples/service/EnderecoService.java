@@ -9,6 +9,8 @@ import com.crud_simples.crud_simples.repository.EnderecoRepository;
 import com.crud_simples.crud_simples.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -85,4 +87,48 @@ public class EnderecoService {
         Endereco endereco = buscar(id);
         enderecoRepository.delete(endereco);
     }
+
+    public byte[] gerarCsv() {
+        List<Endereco> enderecos = enderecoRepository.findAll();
+
+        if (enderecos.isEmpty()) {
+            return "Nenhum endereço cadastrado".getBytes(StandardCharsets.UTF_8);
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        Field[] fields = Endereco.class.getDeclaredFields();
+        for (Field f : fields) {
+            sb.append(f.getName()).append(",");
+        }
+
+        sb.setLength(sb.length() - 1);
+        sb.append("\n");
+
+        for (Endereco e : enderecos) {
+            for (Field f : fields) {
+                f.setAccessible(true);
+
+                Object valor;
+                try {
+                    valor = f.get(e);
+
+                    if (valor instanceof Usuario usuario) {
+                        valor = usuario.getId();
+                    }
+
+                } catch (IllegalAccessException ex) {
+                    valor = "";
+                }
+
+                sb.append(valor != null ? valor : "").append(",");
+            }
+
+            sb.setLength(sb.length() - 1);
+            sb.append("\n");
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
 }

@@ -65,5 +65,14 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/pdf")
+    public ResponseEntity<byte[]> exportarPdfUsuarios() {
+        byte[] pdf = usuarioService.gerarPdfUsuarios();
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=usuarios.pdf")
+                .header("Content-Type", "application/pdf")
+                .body(pdf);
+    }
 
 }

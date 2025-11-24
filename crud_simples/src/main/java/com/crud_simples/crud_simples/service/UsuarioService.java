@@ -8,8 +8,14 @@ import com.crud_simples.crud_simples.model.Usuario;
 import com.crud_simples.crud_simples.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.mindrot.jbcrypt.BCrypt;
-
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.Document;
+import com.lowagie.text.Font;
+import com.lowagie.text.Paragraph;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.awt.*;
 
 @Service
 public class UsuarioService {
@@ -72,5 +78,38 @@ public class UsuarioService {
     public void deletar(Long id) {
         Usuario usuario = buscar(id);
         usuarioRepository.delete(usuario);
+    }
+
+
+    public byte[] gerarPdfUsuarios() {
+
+        List<Usuario> usuarios = usuarioRepository.findAll();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            Document pdf = new Document();
+            PdfWriter.getInstance(pdf, out);
+            pdf.open();
+
+            Font tituloFont = new Font(Font.HELVETICA, 18, Font.BOLD);
+            Font campoFont = new Font(Font.HELVETICA, 12);
+
+            Paragraph titulo = new Paragraph("Lista de Usuários\n\n", tituloFont);
+            pdf.add(titulo);
+
+            for (Usuario u : usuarios) {
+                pdf.add(new Paragraph("ID: " + u.getId(), campoFont));
+                pdf.add(new Paragraph("Nome: " + u.getNome(), campoFont));
+                pdf.add(new Paragraph("Email: " + u.getEmail(), campoFont));
+                pdf.add(new Paragraph("-----------------------------------------\n", campoFont));
+            }
+
+            pdf.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar PDF", e);
+        }
+
+        return out.toByteArray();
     }
 }
