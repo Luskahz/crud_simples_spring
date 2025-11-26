@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Usuários - CRUD Simples</title>
+    <style>
+        /* ====== RESET SIMPLES ====== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f3f4f6;
+            color: #111827;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+        }
+
+        /* ====== LAYOUT ====== */
+
+        header {
+            background: #111827;
+            color: #f9fafb;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header .logo {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .header-tool-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            background: #1f2937;
+            color: #f9fafb;
+            transition: background 0.15s, transform 0.05s;
+            white-space: nowrap;
+        }
+
+        .header-tool-btn:hover {
+            background: #374151;
+            transform: translateY(-1px);
+        }
+
+        main {
+            flex: 1;
+            padding: 20px 24px 32px;
+        }
+
+        .wrapper {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .content {
+            flex: 0 0 74%;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            min-height: 300px;
+        }
+
+        .sidebar {
+            flex: 0 0 24%;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            font-size: 14px;
+        }
+
+        footer {
+            background: #111827;
+            color: #9ca3af;
+            font-size: 12px;
+            padding: 10px 16px;
+            text-align: center;
+        }
+
+        /* ====== CONTENT / CARDS ====== */
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .content-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .content-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reload-btn {
+            font-size: 13px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: #e5e7eb;
+        }
+
+        .reload-btn:hover {
+            background: #d1d5db;
+        }
+
+        .btn-create-user {
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: #16a34a;
+            color: #f9fafb;
+            font-weight: 500;
+        }
+
+        .btn-create-user:hover {
+            background: #15803d;
+        }
+
+        .usuarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 12px;
+        }
+
+        .usuario-card {
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 10px 12px;
+            background: #f9fafb;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .usuario-id {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .usuario-nome {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .usuario-email {
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .usuario-actions {
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-secondary {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .btn-secondary:hover {
+            background: #bae6fd;
+        }
+
+        .empty-state {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        /* ====== SIDEBAR ====== */
+
+        .sidebar h3 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .sidebar p {
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+
+        .sidebar small {
+            color: #9ca3af;
+        }
+
+        /* ====== MODAL BASE ====== */
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: transparent;
+            font-size: 18px;
+            line-height: 1;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .modal-close:hover {
+            background: #e5e7eb;
+        }
+
+        .modal-section {
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9fafb;
+        }
+
+        .modal-section h4 {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .field-row {
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .field-label {
+            font-weight: 600;
+        }
+
+        .add-link {
+            font-size: 13px;
+            color: #0369a1;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .add-link:hover {
+            text-decoration: underline;
+        }
+
+        .add-link span {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .modal-actions {
+            margin-top: 12px;
+            text-align: right;
+        }
+
+        /* ====== FORM MODALS ====== */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 13px;
+        }
+
+        .form-field label {
+            font-weight: 500;
+        }
+
+        .form-field input {
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            padding: 6px 8px;
+            font-size: 13px;
+        }
+
+        .form-field input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 1px #2563eb20;
+        }
+
+        .form-actions {
+            margin-top: 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-light {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-light:hover {
+            background: #d1d5db;
+        }
+
+        /* ====== CONFIRM DELETE ====== */
+
+        .confirm-text {
+            font-size: 14px;
+            margin: 8px 0 12px;
+            color: #374151;
+        }
+
+        .confirm-text strong {
+            color: #111827;
+        }
+
+        .confirm-danger {
+            background: #b91c1c;
+            color: #fee2e2;
+        }
+
+        .confirm-danger:hover {
+            background: #991b1b;
+        }
+
+        /* ====== TOAST SIMPLES ====== */
+
+        .toast {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: #111827;
+            color: #f9fafb;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 60;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background: #b91c1c;
+        }
+
+        /* ====== PASSWORD TOGGLE ====== */
+        .password-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .password-wrapper input {
+            flex: 1;
+        }
+
+        .toggle-password {
+            font-size: 11px;
+            padding: 5px 8px;
+            border-radius: 6px;
+            background: #e5e7eb;
+            color: #111827;
+            white-space: nowrap;
+        }
+
+        .toggle-password:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">CRUD Simples - Painel</div>
+    <div class="header-actions">
+        <button class="header-tool-btn" id="btn-pdf-usuarios">Gerar PDF usuários</button>
+        <button class="header-tool-btn" id="btn-json-documentos">Gerar JSON documentos</button>
+        <button class="header-tool-btn" id="btn-csv-enderecos">Gerar CSV endereços</button>
+    </div>
+</header>
+
+<main>
+    <div class="wrapper">
+        <section class="content">
+            <div class="content-header">
+                <h2>Usuários</h2>
+                <div class="content-header-actions">
+                    <button class="btn-create-user" id="btn-open-create-user">+ Criar usuário</button>
+                    <button class="reload-btn" id="reload-btn">Recarregar lista</button>
+                </div>
+            </div>
+            <div id="usuarios-container">
+                <p class="empty-state">Carregando usuários...</p>
+            </div>
+        </section>
+
+        <aside class="sidebar">
+            <h3>Teste da API</h3>
+            <p>Esta tela lista usuários de <code>GET /usuarios</code> e permite:</p>
+            <ul style="margin-left:16px; margin-bottom:8px; font-size:13px; color:#4b5563;">
+                <li>Excluir usuário <code>DELETE /usuarios/{id}</code></li>
+                <li>Ver endereço/documentos</li>
+                <li>Criar usuário <code>POST /usuarios</code></li>
+                <li>Criar endereço <code>POST /enderecos</code></li>
+                <li>Criar documentos <code>POST /documentos</code></li>
+                <li>Alterar senha <code>PATCH /usuarios/alterarSenha/{id}</code></li>
+                <li>Gerar PDF usuários <code>GET /usuarios/pdf</code></li>
+                <li>Gerar JSON documentos <code>GET /documentos/json</code></li>
+                <li>Gerar CSV endereços <code>GET /enderecos/csv</code></li>
+            </ul>
+            <small>Backend esperado em <code>http://localhost:8080</code> com CORS liberado pra este front.</small>
+        </aside>
+    </div>
+</main>
+
+<footer>
+    Lucas Alves de Melo Lins &mdash; CG3034186 &mdash; IFSP Caraguatatuba &copy; 2025
+</footer>
+
+<!-- MODAL BACKDROP -->
+<div id="modal-backdrop" class="modal-backdrop">
+    <!-- Modal Ver Mais -->
+    <div id="modal-view-user" class="modal" style="display:none;">
+        <div class="modal-header">
+            <div class="modal-title" id="view-user-title">Detalhes do Usuário</div>
+            <button class="modal-close" data-close-modal="view-user">&times;</button>
+        </div>
+        <div>
+            <div class="modal-section">
+                <h4>Endereço</h4>
+                <div id="endereco-content">
+                    <!-- preenchido via JS -->
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <h4>Documentos</h4>
+                <div id="documentos-content">
+                    <!-- preenchido via JS -->
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-light" data-close-modal="view-user">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form Usuário -->
+    <div id="modal-form-usuario" class="modal" style="display:none;">
+        <div class="modal-header">
+            <div class="modal-title">Criar Usuário</div>
+            <button class="modal-close" data-close-modal="form-usuario">&times;</button>
+        </div>
+        <form id="form-usuario">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="usuario-nome">Nome</label>
+                    <input type="text" id="usuario-nome" required>
+                </div>
+                <div class="form-field">
+                    <label for="usuario-email">Email</label>
+                    <input type="email" id="usuario-email" required>
+                </div>
+                <div class="form-field">
+                    <label for="usuario-senha">Senha</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="usuario-senha" required>
+                        <button type="button"
+                                class="toggle-password"
+                                data-target="usuario-senha">
+                            Mostrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-light" data-close-modal="form-usuario">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Salvar Usuário
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal Form Endereço -->
+    <div id="modal-form-endereco" class="modal" style="display:none;">
+        <div class="modal-header">
+            <div class="modal-title">Adicionar Endereço</div>
+            <button class="modal-close" data-close-modal="form-endereco">&times;</button>
+        </div>
+        <form id="form-endereco">
+            <input type="hidden" id="endereco-idUsuario">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="endereco-pais">País</label>
+                    <input type="text" id="endereco-pais" required>
+                </div>
+                <div class="form-field">
+                    <label for="endereco-estado">Estado</label>
+                    <input type="text" id="endereco-estado" required>
+                </div>
+                <div class="form-field">
+                    <label for="endereco-cidade">Cidade</label>
+                    <input type="text" id="endereco-cidade" required>
+                </div>
+                <div class="form-field">
+                    <label for="endereco-bairro">Bairro</label>
+                    <input type="text" id="endereco-bairro" required>
+                </div>
+                <div class="form-field">
+                    <label for="endereco-rua">Rua</label>
+                    <input type="text" id="endereco-rua" required>
+                </div>
+                <div class="form-field">
+                    <label for="endereco-numero">Número</label>
+                    <input type="number" id="endereco-numero" required>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-light" data-close-modal="form-endereco">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Salvar Endereço
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal Form Documentos -->
+    <div id="modal-form-documentos" class="modal" style="display:none;">
+        <div class="modal-header">
+            <div class="modal-title">Adicionar Documentos</div>
+            <button class="modal-close" data-close-modal="form-documentos">&times;</button>
+        </div>
+        <form id="form-documentos">
+            <input type="hidden" id="documentos-idUsuario">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="documentos-cpf">CPF</label>
+                    <input type="text" id="documentos-cpf" required>
+                </div>
+                <div class="form-field">
+                    <label for="documentos-rg">RG</label>
+                    <input type="text" id="documentos-rg" required>
+                </div>
+                <div class="form-field">
+                    <label for="documentos-cnh">CNH</label>
+                    <input type="text" id="documentos-cnh" required>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-light" data-close-modal="form-documentos">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Salvar Documentos
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal Form Alterar Senha -->
+    <div id="modal-form-senha" class="modal" style="display:none;">
+        <div class="modal-header">
+            <div class="modal-title">Alterar senha</div>
+            <button class="modal-close" data-close-modal="form-senha">&times;</button>
+        </div>
+        <form id="form-senha">
+            <input type="hidden" id="senha-idUsuario">
+            <div class="form-field">
+                <label for="senha-nova">Nova senha</label>
+                <div class="password-wrapper">
+                    <input type="password" id="senha-nova" required>
+                    <button type="button"
+                            class="toggle-password"
+                            data-target="senha-nova">
+                        Mostrar
+                    </button>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-light" data-close-modal="form-senha">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Salvar nova senha
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal Confirmar Delete -->
+    <div id="modal-confirm-delete" class="modal" style="display:none;">
+        <div class="modal-header">
+            <div class="modal-title">Confirmar exclusão</div>
+            <button class="modal-close" data-close-modal="confirm-delete">&times;</button>
+        </div>
+        <div>
+            <p class="confirm-text">
+                Tem certeza que deseja excluir o usuário <strong id="confirm-user-name"></strong> (ID:
+                <span id="confirm-user-id"></span>)?
+            </p>
+            <div class="form-actions">
+                <button type="button" class="btn btn-light" data-close-modal="confirm-delete">
+                    Cancelar
+                </button>
+                <button type="button" class="btn confirm-danger" id="btn-confirm-delete">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    const API_BASE = "http://localhost:8080";
+
+    const usuariosContainer = document.getElementById("usuarios-container");
+    const reloadBtn = document.getElementById("reload-btn");
+    const btnOpenCreateUser = document.getElementById("btn-open-create-user");
+
+    const btnPdfUsuarios = document.getElementById("btn-pdf-usuarios");
+    const btnJsonDocumentos = document.getElementById("btn-json-documentos");
+    const btnCsvEnderecos = document.getElementById("btn-csv-enderecos");
+
+    const modalBackdrop = document.getElementById("modal-backdrop");
+    const modalViewUser = document.getElementById("modal-view-user");
+    const modalFormUsuario = document.getElementById("modal-form-usuario");
+    const modalFormEndereco = document.getElementById("modal-form-endereco");
+    const modalFormDocumentos = document.getElementById("modal-form-documentos");
+    const modalFormSenha = document.getElementById("modal-form-senha");
+    const modalConfirmDelete = document.getElementById("modal-confirm-delete");
+
+    const viewUserTitle = document.getElementById("view-user-title");
+    const enderecoContent = document.getElementById("endereco-content");
+    const documentosContent = document.getElementById("documentos-content");
+
+    const formUsuario = document.getElementById("form-usuario");
+    const formEndereco = document.getElementById("form-endereco");
+    const formDocumentos = document.getElementById("form-documentos");
+    const formSenha = document.getElementById("form-senha");
+
+    const toastEl = document.getElementById("toast");
+
+    const confirmUserName = document.getElementById("confirm-user-name");
+    const confirmUserId = document.getElementById("confirm-user-id");
+    const btnConfirmDelete = document.getElementById("btn-confirm-delete");
+
+    let currentUserId = null;
+    let currentUserNome = null;
+    let userToDeleteId = null;
+
+    // ===== TOAST SIMPLES =====
+    function showToast(message, isError = false) {
+        toastEl.textContent = message;
+        toastEl.classList.remove("error");
+        if (isError) {
+            toastEl.classList.add("error");
+        }
+        toastEl.classList.add("show");
+        setTimeout(() => {
+            toastEl.classList.remove("show");
+        }, 2500);
+    }
+
+    // ===== MODAL CONTROLS =====
+    function openBackdrop() {
+        modalBackdrop.classList.add("active");
+    }
+
+    function closeBackdropIfNoModals() {
+        if (
+            modalViewUser.style.display === "none" &&
+            modalFormUsuario.style.display === "none" &&
+            modalFormEndereco.style.display === "none" &&
+            modalFormDocumentos.style.display === "none" &&
+            modalFormSenha.style.display === "none" &&
+            modalConfirmDelete.style.display === "none"
+        ) {
+            modalBackdrop.classList.remove("active");
+        }
+    }
+
+    function openModal(id) {
+        openBackdrop();
+        switch (id) {
+            case "view-user":
+                modalViewUser.style.display = "block";
+                break;
+            case "form-usuario":
+                modalFormUsuario.style.display = "block";
+                break;
+            case "form-endereco":
+                modalFormEndereco.style.display = "block";
+                break;
+            case "form-documentos":
+                modalFormDocumentos.style.display = "block";
+                break;
+            case "form-senha":
+                modalFormSenha.style.display = "block";
+                break;
+            case "confirm-delete":
+                modalConfirmDelete.style.display = "block";
+                break;
+        }
+    }
+
+    function closeModal(id) {
+        switch (id) {
+            case "view-user":
+                modalViewUser.style.display = "none";
+                break;
+            case "form-usuario":
+                modalFormUsuario.style.display = "none";
+                break;
+            case "form-endereco":
+                modalFormEndereco.style.display = "none";
+                break;
+            case "form-documentos":
+                modalFormDocumentos.style.display = "none";
+                break;
+            case "form-senha":
+                modalFormSenha.style.display = "none";
+                break;
+            case "confirm-delete":
+                modalConfirmDelete.style.display = "none";
+                break;
+        }
+        closeBackdropIfNoModals();
+    }
+
+    // fechar modais pelos botões com data-close-modal
+    document.querySelectorAll("[data-close-modal]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-close-modal");
+            closeModal(id);
+        });
+    });
+
+    // fechar tudo ao clicar fora
+    modalBackdrop.addEventListener("click", (e) => {
+        if (e.target === modalBackdrop) {
+            modalViewUser.style.display = "none";
+            modalFormUsuario.style.display = "none";
+            modalFormEndereco.style.display = "none";
+            modalFormDocumentos.style.display = "none";
+            modalFormSenha.style.display = "none";
+            modalConfirmDelete.style.display = "none";
+            closeBackdropIfNoModals();
+        }
+    });
+
+    // ===== PASSWORD TOGGLE JS =====
+    document.querySelectorAll(".toggle-password").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-target");
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            const isHidden = input.type === "password";
+            input.type = isHidden ? "text" : "password";
+            btn.textContent = isHidden ? "Ocultar" : "Mostrar";
+        });
+    });
+
+    // ===== BOTÕES DO HEADER (EXPORTS) =====
+    btnPdfUsuarios.addEventListener("click", () => {
+        window.open(`${API_BASE}/usuarios/pdf`, "_blank");
+    });
+
+    btnJsonDocumentos.addEventListener("click", () => {
+        window.open(`${API_BASE}/documentos/json`, "_blank");
+    });
+
+    btnCsvEnderecos.addEventListener("click", () => {
+        window.open(`${API_BASE}/enderecos/csv`, "_blank");
+    });
+
+    // ===== API HELPERS =====
+
+    async function fetchJson(url, options = {}) {
+        const res = await fetch(url, options);
+        if (!res.ok) {
+            throw res;
+        }
+        return res.json();
+    }
+
+    async function fetchOptionalJson(url) {
+        try {
+            const res = await fetch(url);
+            if (res.status === 404) {
+                return null;
+            }
+            if (!res.ok) {
+                throw res;
+            }
+            return res.json();
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    // ===== CARREGAR USUÁRIOS =====
+
+    async function loadUsuarios() {
+        usuariosContainer.innerHTML = '<p class="empty-state">Carregando usuários...</p>';
+        try {
+            const usuarios = await fetchJson(`${API_BASE}/usuarios`);
+            if (!usuarios || usuarios.length === 0) {
+                usuariosContainer.innerHTML = '<p class="empty-state">Nenhum usuário encontrado.</p>';
+                return;
+            }
+
+            const grid = document.createElement("div");
+            grid.className = "usuarios-grid";
+
+            usuarios.forEach(usuario => {
+                const card = document.createElement("div");
+                card.className = "usuario-card";
+
+                const idEl = document.createElement("div");
+                idEl.className = "usuario-id";
+                idEl.textContent = `ID: ${usuario.id}`;
+
+                const nomeEl = document.createElement("div");
+                nomeEl.className = "usuario-nome";
+                nomeEl.textContent = usuario.nome;
+
+                const emailEl = document.createElement("div");
+                emailEl.className = "usuario-email";
+                emailEl.textContent = usuario.email;
+
+                const actions = document.createElement("div");
+                actions.className = "usuario-actions";
+
+                const btnVerMais = document.createElement("button");
+                btnVerMais.className = "btn btn-secondary";
+                btnVerMais.textContent = "Ver mais";
+                btnVerMais.addEventListener("click", () => {
+                    openViewMore(usuario);
+                });
+
+                const btnAlterarSenha = document.createElement("button");
+                btnAlterarSenha.className = "btn btn-secondary";
+                btnAlterarSenha.textContent = "Alterar senha";
+                btnAlterarSenha.addEventListener("click", () => {
+                    openSenhaForm(usuario);
+                });
+
+                const btnExcluir = document.createElement("button");
+                btnExcluir.className = "btn btn-danger";
+                btnExcluir.textContent = "Excluir";
+                btnExcluir.addEventListener("click", () => {
+                    openConfirmDelete(usuario);
+                });
+
+                actions.appendChild(btnVerMais);
+                actions.appendChild(btnAlterarSenha);
+                actions.appendChild(btnExcluir);
+
+                card.appendChild(idEl);
+                card.appendChild(nomeEl);
+                card.appendChild(emailEl);
+                card.appendChild(actions);
+
+                grid.appendChild(card);
+            });
+
+            usuariosContainer.innerHTML = "";
+            usuariosContainer.appendChild(grid);
+        } catch (err) {
+            console.error("Erro ao carregar usuários", err);
+            usuariosContainer.innerHTML = '<p class="empty-state">Erro ao carregar usuários. Veja o console.</p>';
+            showToast("Erro ao carregar usuários.", true);
+        }
+    }
+
+    // ===== VER MAIS (ENDEREÇO / DOCUMENTOS) =====
+
+    async function openViewMore(usuario) {
+        currentUserId = usuario.id;
+        currentUserNome = usuario.nome;
+        viewUserTitle.textContent = `Detalhes de ${usuario.nome} (ID: ${usuario.id})`;
+
+        enderecoContent.innerHTML = '<p class="empty-state">Carregando endereço...</p>';
+        documentosContent.innerHTML = '<p class="empty-state">Carregando documentos...</p>';
+
+        openModal("view-user");
+
+        // Carregar endereço
+        try {
+            const endereco = await fetchOptionalJson(`${API_BASE}/enderecos/usuario/${usuario.id}`);
+            if (!endereco) {
+                enderecoContent.innerHTML = `
+                    <p class="empty-state">Nenhum endereço cadastrado.</p>
+                    <button class="add-link" id="btn-add-endereco">
+                        <span>+</span> Adicionar endereço
+                    </button>
+                `;
+                document.getElementById("btn-add-endereco").addEventListener("click", () => {
+                    openEnderecoForm(usuario.id);
+                });
+            } else {
+                enderecoContent.innerHTML = `
+                    <div class="field-row"><span class="field-label">País:</span> ${endereco.pais}</div>
+                    <div class="field-row"><span class="field-label">Estado:</span> ${endereco.estado}</div>
+                    <div class="field-row"><span class="field-label">Cidade:</span> ${endereco.cidade}</div>
+                    <div class="field-row"><span class="field-label">Bairro:</span> ${endereco.bairro}</div>
+                    <div class="field-row"><span class="field-label">Rua:</span> ${endereco.rua}, ${endereco.numero}</div>
+                `;
+            }
+        } catch (err) {
+            console.error("Erro ao carregar endereço", err);
+            enderecoContent.innerHTML = '<p class="empty-state">Erro ao carregar endereço.</p>';
+        }
+
+        // Carregar documentos
+        try {
+            const docs = await fetchOptionalJson(`${API_BASE}/documentos/usuario/${usuario.id}`);
+            if (!docs) {
+                documentosContent.innerHTML = `
+                    <p class="empty-state">Nenhum documento cadastrado.</p>
+                    <button class="add-link" id="btn-add-documentos">
+                        <span>+</span> Adicionar documentos
+                    </button>
+                `;
+                document.getElementById("btn-add-documentos").addEventListener("click", () => {
+                    openDocumentosForm(usuario.id);
+                });
+            } else {
+                documentosContent.innerHTML = `
+                    <div class="field-row"><span class="field-label">CPF:</span> ${docs.cpf}</div>
+                    <div class="field-row"><span class="field-label">RG:</span> ${docs.rg}</div>
+                    <div class="field-row"><span class="field-label">CNH:</span> ${docs.cnh}</div>
+                `;
+            }
+        } catch (err) {
+            console.error("Erro ao carregar documentos", err);
+            documentosContent.innerHTML = '<p class="empty-state">Erro ao carregar documentos.</p>';
+        }
+    }
+
+    function openEnderecoForm(idUsuario) {
+        closeModal("view-user");
+        document.getElementById("endereco-idUsuario").value = idUsuario;
+        formEndereco.reset();
+        openModal("form-endereco");
+    }
+
+    function openDocumentosForm(idUsuario) {
+        closeModal("view-user");
+        document.getElementById("documentos-idUsuario").value = idUsuario;
+        formDocumentos.reset();
+        openModal("form-documentos");
+    }
+
+    function openSenhaForm(usuario) {
+        document.getElementById("senha-idUsuario").value = usuario.id;
+        document.getElementById("senha-nova").value = "";
+        openModal("form-senha");
+    }
+
+    // ===== CONFIRM DELETE =====
+
+    function openConfirmDelete(usuario) {
+        userToDeleteId = usuario.id;
+        confirmUserId.textContent = usuario.id;
+        confirmUserName.textContent = usuario.nome;
+        openModal("confirm-delete");
+    }
+
+    btnConfirmDelete.addEventListener("click", async () => {
+        if (!userToDeleteId) return;
+        try {
+            const res = await fetch(`${API_BASE}/usuarios/${userToDeleteId}`, {
+                method: "DELETE"
+            });
+            if (!res.ok) {
+                throw res;
+            }
+            showToast("Usuário excluído com sucesso.");
+            closeModal("confirm-delete");
+            await loadUsuarios();
+        } catch (err) {
+            console.error("Erro ao deletar usuário", err);
+            showToast("Erro ao deletar usuário.", true);
+        } finally {
+            userToDeleteId = null;
+        }
+    });
+
+    // ===== SUBMIT FORM USUÁRIO =====
+
+    btnOpenCreateUser.addEventListener("click", () => {
+        formUsuario.reset();
+        openModal("form-usuario");
+    });
+
+    formUsuario.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const payload = {
+            nome: document.getElementById("usuario-nome").value.trim(),
+            email: document.getElementById("usuario-email").value.trim(),
+            senha: document.getElementById("usuario-senha").value.trim()
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/usuarios`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                throw res;
+            }
+            showToast("Usuário criado com sucesso.");
+            closeModal("form-usuario");
+            await loadUsuarios();
+        } catch (err) {
+            console.error("Erro ao criar usuário", err);
+            showToast("Erro ao criar usuário.", true);
+        }
+    });
+
+    // ===== SUBMIT FORM ENDEREÇO =====
+
+    formEndereco.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const idUsuario = Number(document.getElementById("endereco-idUsuario").value);
+        const payload = {
+            idUsuario: idUsuario,
+            pais: document.getElementById("endereco-pais").value.trim(),
+            estado: document.getElementById("endereco-estado").value.trim(),
+            cidade: document.getElementById("endereco-cidade").value.trim(),
+            bairro: document.getElementById("endereco-bairro").value.trim(),
+            rua: document.getElementById("endereco-rua").value.trim(),
+            numero: Number(document.getElementById("endereco-numero").value)
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/enderecos`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                throw res;
+            }
+            showToast("Endereço criado com sucesso.");
+            closeModal("form-endereco");
+            if (currentUserId && currentUserNome) {
+                openViewMore({id: currentUserId, nome: currentUserNome});
+            }
+        } catch (err) {
+            console.error("Erro ao criar endereço", err);
+            showToast("Erro ao criar endereço.", true);
+        }
+    });
+
+    // ===== SUBMIT FORM DOCUMENTOS =====
+
+    formDocumentos.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const idUsuario = Number(document.getElementById("documentos-idUsuario").value);
+        const payload = {
+            idUsuario: idUsuario,
+            cpf: document.getElementById("documentos-cpf").value.trim(),
+            rg: document.getElementById("documentos-rg").value.trim(),
+            cnh: document.getElementById("documentos-cnh").value.trim()
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/documentos`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                throw res;
+            }
+            showToast("Documentos criados com sucesso.");
+            closeModal("form-documentos");
+            if (currentUserId && currentUserNome) {
+                openViewMore({id: currentUserId, nome: currentUserNome});
+            }
+        } catch (err) {
+            console.error("Erro ao criar documentos", err);
+            showToast("Erro ao criar documentos.", true);
+        }
+    });
+
+    // ===== SUBMIT FORM ALTERAR SENHA =====
+
+    formSenha.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const idUsuario = Number(document.getElementById("senha-idUsuario").value);
+        const novaSenha = document.getElementById("senha-nova").value.trim();
+
+        const payload = {
+            senha: novaSenha
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/usuarios/alterarSenha/${idUsuario}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                throw res;
+            }
+            showToast("Senha alterada com sucesso.");
+            closeModal("form-senha");
+        } catch (err) {
+            console.error("Erro ao alterar senha", err);
+            showToast("Erro ao alterar senha.", true);
+        }
+    });
+
+    // ===== EVENTOS GERAIS =====
+
+    reloadBtn.addEventListener("click", () => {
+        loadUsuarios();
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadUsuarios();
+    });
+</script>
+</body>
+</html>
